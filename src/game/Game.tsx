@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
+import { PreloadScene } from './scenes/PreloadScene';
 import { GameScene } from './GameScene';
 
 const Game = () => {
@@ -21,7 +22,7 @@ const Game = () => {
           debug: false,
         },
       },
-      scene: [GameScene],
+      scene: [PreloadScene, GameScene],
       backgroundColor: '#000000',
       scale: {
         mode: Phaser.Scale.FIT,

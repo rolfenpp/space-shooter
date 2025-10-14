@@ -7,9 +7,9 @@ An addictive 2D space shooter game built with React, TypeScript, and Phaser 3. W
 ### Core Gameplay
 - 🎮 **Spaceship Control** - Smooth player movement at the bottom of the screen
 - 👾 **Wave-Based Enemies** - Progressive difficulty with enemy waves
-- 💥 **Combat System** - Shoot bullets to destroy enemies
+- 💥 **Auto-Shooting** - Spaceship shoots automatically at enemies
 - 📱 **Mobile Support** - Touch controls for mobile devices
-- ⌨️ **Keyboard Controls** - Arrow keys + space bar for desktop
+- ⌨️ **Keyboard Controls** - Arrow keys to move
 
 ### Enemy Types
 - **Basic (Red)** - Standard enemy, 1 HP, 10 points
@@ -58,11 +58,11 @@ src/game/
 
 ### Desktop
 - **Arrow Left/Right**: Move spaceship
-- **Space**: Shoot
+- **Auto-Shooting**: Spaceship shoots automatically
 
 ### Mobile
 - **Drag**: Move spaceship left/right
-- **Tap/Release**: Shoot
+- **Auto-Shooting**: Spaceship shoots automatically
 
 ## Getting Started
 
@@ -121,6 +121,15 @@ Simply edit values in `GameConfig.ts`:
 - `waves.spawnRateDecrease` - How much faster enemies spawn
 - `enemy.baseSpeed` - Base enemy speed
 - `powerups.spawnChance` - How often power-ups drop
+
+## Graphics
+
+The game uses a **sprite-based rendering system** with:
+- Procedurally generated textures as fallback
+- Support for custom PNG sprites
+- Easy sprite swapping system
+
+**Want better graphics?** Check out `SPRITES.md` for instructions on adding professional sprite images from free sources like Kenney.nl!
 
 ## Tech Stack
 

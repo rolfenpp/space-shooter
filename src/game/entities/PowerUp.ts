@@ -4,7 +4,7 @@ import { GameConfig } from '../config/GameConfig';
 export type PowerUpType = 'rapidFire' | 'multiShot' | 'shield';
 
 export class PowerUp {
-  public sprite: Phaser.GameObjects.Graphics;
+  public sprite: Phaser.GameObjects.Sprite;
   public body: Phaser.Physics.Arcade.Body;
   public type: PowerUpType;
   
@@ -14,34 +14,10 @@ export class PowerUp {
     this.scene = scene;
     this.type = type;
 
-    const config = GameConfig.powerups.types[type];
-
-    // Create power-up sprite (star shape)
-    this.sprite = scene.add.graphics();
-    this.sprite.fillStyle(config.color, 1);
-    
-    // Draw a star
-    const points: number[] = [];
-    const radius = 10;
-    for (let i = 0; i < 5; i++) {
-      // Outer point
-      const angle1 = (i * 2 * Math.PI) / 5 - Math.PI / 2;
-      points.push(Math.cos(angle1) * radius, Math.sin(angle1) * radius);
-      
-      // Inner point
-      const angle2 = ((i * 2 + 1) * Math.PI) / 5 - Math.PI / 2;
-      points.push(Math.cos(angle2) * radius * 0.5, Math.sin(angle2) * radius * 0.5);
-    }
-    
-    this.sprite.fillPoints(
-      points.map((val, idx) => ({
-        x: idx % 2 === 0 ? val : points[idx],
-        y: idx % 2 === 1 ? val : points[idx],
-      })) as { x: number; y: number }[],
-      true
-    );
-
-    this.sprite.setPosition(x, y);
+    // Create power-up sprite
+    const spriteKey = `powerup-${type === 'rapidFire' ? 'rapid' : type === 'multiShot' ? 'multi' : 'shield'}`;
+    this.sprite = scene.add.sprite(x, y, spriteKey);
+    this.sprite.setScale(.5); // Scale down Kenney sprites
 
     // Add physics
     scene.physics.add.existing(this.sprite);
@@ -52,10 +28,18 @@ export class PowerUp {
     // Add pulsing animation
     scene.tweens.add({
       targets: this.sprite,
-      scaleX: 1.2,
-      scaleY: 1.2,
+      scaleX: 1.3,
+      scaleY: 1.3,
       duration: 500,
       yoyo: true,
+      repeat: -1,
+    });
+
+    // Add rotation
+    scene.tweens.add({
+      targets: this.sprite,
+      angle: 360,
+      duration: 2000,
       repeat: -1,
     });
   }
@@ -72,4 +56,3 @@ export class PowerUp {
     this.sprite.destroy();
   }
 }
-

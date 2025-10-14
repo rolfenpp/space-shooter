@@ -2,24 +2,16 @@ import Phaser from 'phaser';
 import { GameConfig } from '../config/GameConfig';
 
 export class Bullet {
-  public sprite: Phaser.GameObjects.Rectangle;
+  public sprite: Phaser.GameObjects.Sprite;
   public body: Phaser.Physics.Arcade.Body;
   public damage: number;
-  
-  private scene: Phaser.Scene;
 
   constructor(scene: Phaser.Scene, x: number, y: number, damage: number = GameConfig.bullet.damage) {
-    this.scene = scene;
     this.damage = damage;
 
     // Create bullet sprite
-    this.sprite = scene.add.rectangle(
-      x,
-      y,
-      GameConfig.bullet.width,
-      GameConfig.bullet.height,
-      GameConfig.bullet.color
-    );
+    this.sprite = scene.add.sprite(x, y, 'bullet');
+    this.sprite.setScale(.5); // Scale down Kenney sprites
 
     // Add physics
     scene.physics.add.existing(this.sprite);
@@ -39,4 +31,3 @@ export class Bullet {
     this.sprite.destroy();
   }
 }
-

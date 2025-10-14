@@ -4,7 +4,7 @@ import { GameConfig } from '../config/GameConfig';
 export type EnemyType = 'basic' | 'fast' | 'tank';
 
 export class Enemy {
-  public sprite: Phaser.GameObjects.Graphics;
+  public sprite: Phaser.GameObjects.Sprite;
   public body: Phaser.Physics.Arcade.Body;
   public type: EnemyType;
   public health: number;
@@ -24,20 +24,24 @@ export class Enemy {
     this.maxHealth = enemyConfig.health;
     this.scoreValue = enemyConfig.scoreValue;
 
-    // Create enemy sprite (inverted triangle)
-    this.sprite = scene.add.graphics();
-    this.sprite.fillStyle(enemyConfig.color, 1);
-    this.sprite.fillTriangle(
-      GameConfig.enemy.width / 2, 0,
-      0, GameConfig.enemy.height,
-      GameConfig.enemy.width, GameConfig.enemy.height
-    );
-    this.sprite.setPosition(x, y);
+    // Create enemy sprite based on type
+    const spriteKey = `enemy-${type}`;
+    this.sprite = scene.add.sprite(x, y, spriteKey);
+    this.sprite.setScale(.5); // Scale down Kenney sprites
+    this.sprite.setAngle(180); // Rotate enemies to face downward
 
     // Add physics
     scene.physics.add.existing(this.sprite);
     this.body = this.sprite.body as Phaser.Physics.Arcade.Body;
-    this.body.setSize(GameConfig.enemy.width, GameConfig.enemy.height);
+    
+    // Set hitbox to match sprite size (80% for better gameplay feel)
+    const hitboxWidth = this.sprite.displayWidth * 0.8;
+    const hitboxHeight = this.sprite.displayHeight * 0.8;
+    this.body.setSize(hitboxWidth, hitboxHeight);
+    this.body.setOffset(
+      (this.sprite.width - hitboxWidth) / 2,
+      (this.sprite.height - hitboxHeight) / 2
+    );
 
     // Set velocity based on type and difficulty
     const speed = (GameConfig.enemy.baseSpeed + 
@@ -67,7 +71,7 @@ export class Enemy {
     this.healthBar.fillStyle(0xff0000, 0.5);
     this.healthBar.fillRect(
       this.sprite.x - GameConfig.enemy.width / 2,
-      this.sprite.y - 10,
+      this.sprite.y - 15,
       GameConfig.enemy.width,
       3
     );
@@ -77,7 +81,7 @@ export class Enemy {
     this.healthBar.fillStyle(0x00ff00, 1);
     this.healthBar.fillRect(
       this.sprite.x - GameConfig.enemy.width / 2,
-      this.sprite.y - 10,
+      this.sprite.y - 15,
       GameConfig.enemy.width * healthPercent,
       3
     );
@@ -86,25 +90,25 @@ export class Enemy {
   takeDamage(damage: number): boolean {
     this.health -= damage;
     
-    // Flash white when hit
-    const originalColor = GameConfig.enemy.types[this.type].color;
-    this.sprite.clear();
-    this.sprite.fillStyle(0xffffff, 1);
-    this.sprite.fillTriangle(
-      GameConfig.enemy.width / 2, 0,
-      0, GameConfig.enemy.height,
-      GameConfig.enemy.width, GameConfig.enemy.height
+    // Create bright white flash overlay
+    const flash = this.scene.add.rectangle(
+      this.sprite.x,
+      this.sprite.y,
+      this.sprite.displayWidth,
+      this.sprite.displayHeight,
+      0xffffff,
+      0.8
     );
+    flash.setDepth(this.sprite.depth + 1);
     
-    // Return to normal after 100ms
-    this.scene.time.delayedCall(100, () => {
-      this.sprite.clear();
-      this.sprite.fillStyle(originalColor, 1);
-      this.sprite.fillTriangle(
-        GameConfig.enemy.width / 2, 0,
-        0, GameConfig.enemy.height,
-        GameConfig.enemy.width, GameConfig.enemy.height
-      );
+    // Fade out flash quickly
+    this.scene.tweens.add({
+      targets: flash,
+      alpha: 0,
+      duration: 150,
+      onComplete: () => {
+        flash.destroy();
+      }
     });
 
     this.updateHealthBar();
@@ -132,4 +136,3 @@ export class Enemy {
     this.healthBar?.destroy();
   }
 }
-

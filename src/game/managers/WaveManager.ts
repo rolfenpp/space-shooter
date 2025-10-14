@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GameConfig } from '../config/GameConfig';
-import { Enemy, EnemyType } from '../entities/Enemy';
+import { Enemy, type EnemyType } from '../entities/Enemy';
 
 export class WaveManager {
   private scene: Phaser.Scene;
