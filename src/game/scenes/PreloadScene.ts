@@ -21,11 +21,11 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     // Load background
-    this.load.setPath('src/assets/kenney_space-shooter-redux/Backgrounds/');
+    this.load.setPath('assets/kenney_space-shooter-redux/Backgrounds/');
     this.load.image('background', 'darkPurple.png');
     
     // Load sprites from Kenney's Space Shooter Redux pack
-    this.load.setPath('src/assets/kenney_space-shooter-redux/PNG/');
+    this.load.setPath('assets/kenney_space-shooter-redux/PNG/');
     
     // Player ship
     this.load.image('player-ship', 'playerShip1_blue.png');
