@@ -17,6 +17,7 @@ export class UpgradeUI {
 
     const centerX = this.scene.cameras.main.width / 2;
     const centerY = this.scene.cameras.main.height / 2;
+    const screenWidth = this.scene.cameras.main.width;
 
     // Dark overlay
     this.overlay = this.scene.add.rectangle(
@@ -33,61 +34,69 @@ export class UpgradeUI {
     this.container = this.scene.add.container(0, 0);
     this.container.setDepth(1001);
 
-    // Title
-    const title = this.scene.add.text(centerX, centerY - 150, `🎉 LEVEL ${level}! 🎉`, {
-      ...FontConfig.styles.huge,
+    // Title - adjusted size for mobile
+    const titleStyle = screenWidth < 400 ? FontConfig.styles.subtitle : FontConfig.styles.huge;
+    const title = this.scene.add.text(centerX, 50, `🎉 LEVEL ${level}! 🎉`, {
+      ...titleStyle,
       color: '#ffff00',
     }).setOrigin(0.5);
 
-    const subtitle = this.scene.add.text(centerX, centerY - 100, 'Choose Your Upgrade', {
+    const subtitle = this.scene.add.text(centerX, 90, 'Choose Your Upgrade', {
       ...FontConfig.styles.body,
       color: '#00ffff',
     }).setOrigin(0.5);
 
     this.container.add([title, subtitle]);
 
-    // Create 3 upgrade cards
-    const cardWidth = 200;
-    const cardHeight = 250;
-    const spacing = 30;
+    // Mobile-first: Stack cards vertically
+    const cardWidth = Math.min(screenWidth - 40, 280); // 20px margin on each side
+    const cardHeight = 140;
+    const spacing = 15;
     
-    // Calculate total width and center properly
-    const totalWidth = (cardWidth * 3) + (spacing * 2);
-    const startX = centerX - (totalWidth / 2) + (cardWidth / 2);
+    // Calculate starting Y position to center all cards vertically
+    const totalHeight = (cardHeight * 3) + (spacing * 2);
+    const startY = centerY - (totalHeight / 2) + (cardHeight / 2) + 40;
 
     upgrades.forEach((upgrade, index) => {
-      const x = startX + index * (cardWidth + spacing);
-      const y = centerY;
+      const x = centerX;
+      const y = startY + index * (cardHeight + spacing);
 
       // Card background
       const card = this.scene.add.rectangle(x, y, cardWidth, cardHeight, 0x1a1a1a, 1);
       card.setStrokeStyle(3, 0x00ff00);
 
-      // Icon
-      const icon = this.scene.add.text(x, y - 70, upgrade.icon, {
-        fontSize: '48px',
+      // Layout elements horizontally within the card
+      const iconX = x - cardWidth / 2 + 40; // Left side
+      const textStartX = iconX + 50; // Text starts after icon
+      const textWidth = cardWidth - 110; // Available width for text
+      const buttonWidth = 80;
+
+      // Icon (smaller for compact layout)
+      const icon = this.scene.add.text(iconX, y, upgrade.icon, {
+        fontSize: '32px',
       }).setOrigin(0.5);
 
       // Name
-      const name = this.scene.add.text(x, y - 10, upgrade.name, {
-        ...FontConfig.styles.smallBold,
+      const name = this.scene.add.text(textStartX, y - 20, upgrade.name, {
+        ...FontConfig.styles.small,
         color: '#00ff00',
-        wordWrap: { width: cardWidth - 20 },
-        align: 'center',
-      }).setOrigin(0.5);
+        wordWrap: { width: textWidth },
+        align: 'left',
+      }).setOrigin(0, 0.5);
 
       // Description
-      const description = this.scene.add.text(x, y + 40, upgrade.description, {
+      const description = this.scene.add.text(textStartX, y + 10, upgrade.description, {
         ...FontConfig.styles.tiny,
         color: '#ffffff',
-        wordWrap: { width: cardWidth - 20 },
-        align: 'center',
-      }).setOrigin(0.5);
+        wordWrap: { width: textWidth },
+        align: 'left',
+      }).setOrigin(0, 0.5);
 
-      // Select button
-      const button = this.scene.add.rectangle(x, y + 95, cardWidth - 40, 40, 0x00aa00, 1);
-      const buttonText = this.scene.add.text(x, y + 95, 'SELECT', {
-        ...FontConfig.styles.smallBold,
+      // Select button (on the right)
+      const buttonX = x + cardWidth / 2 - buttonWidth / 2 - 10;
+      const button = this.scene.add.rectangle(buttonX, y, buttonWidth, 50, 0x00aa00, 1);
+      const buttonText = this.scene.add.text(buttonX, y, '✓', {
+        fontSize: '28px',
         color: '#ffffff',
       }).setOrigin(0.5);
 
