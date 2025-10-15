@@ -275,7 +275,7 @@ export class GameManager {
   }
 
   spawnEnemy() {
-    if (this.gameOver) return;
+    if (this.gameOver || this.isPaused) return;
     
     const progress = this.waveManager.getWaveProgress();
     if (progress.killed >= progress.total) {
@@ -424,6 +424,11 @@ export class GameManager {
   pauseGame() {
     this.isPaused = true;
     
+    // Pause the spawn timer
+    if (this.spawnTimer) {
+      this.spawnTimer.paused = true;
+    }
+    
     // Stop all enemies and store their velocities
     this.pausedEnemyVelocities.clear();
     this.enemies.forEach(enemy => {
@@ -451,6 +456,11 @@ export class GameManager {
   }
 
   resumeGame() {
+    // Resume the spawn timer
+    if (this.spawnTimer) {
+      this.spawnTimer.paused = false;
+    }
+    
     // Restore enemy velocities
     this.enemies.forEach(enemy => {
       const velocity = this.pausedEnemyVelocities.get(enemy);
@@ -481,6 +491,7 @@ export class GameManager {
   showPauseMenu() {
     const centerX = this.scene.cameras.main.width / 2;
     const centerY = this.scene.cameras.main.height / 2;
+    const screenWidth = this.scene.cameras.main.width;
 
     // Dark overlay
     this.pauseOverlay = this.scene.add.rectangle(
@@ -497,17 +508,23 @@ export class GameManager {
     this.pauseMenu = this.scene.add.container(0, 0);
     this.pauseMenu.setDepth(1001);
 
-    // Pause title
+    // Pause title - mobile responsive
+    const titleStyle = screenWidth < 400 ? FontConfig.styles.huge : FontConfig.styles.title;
     const title = this.scene.add.text(centerX, centerY - 80, 'PAUSED', {
-      ...FontConfig.styles.title,
+      ...titleStyle,
       color: '#00ffff',
     }).setOrigin(0.5);
 
+    // Button dimensions - mobile responsive
+    const buttonWidth = Math.min(250, screenWidth - 80);
+    const buttonHeight = 50;
+    const buttonFontSize = screenWidth < 400 ? '20px' : '24px';
+
     // Resume button
-    const resumeButton = this.scene.add.rectangle(centerX, centerY + 20, 250, 60, 0x00aa00, 1);
-    const resumeText = this.scene.add.text(centerX, centerY + 20, '▶️ RESUME', {
-      ...FontConfig.styles.subtitle,
-      fontSize: '28px',
+    const resumeButton = this.scene.add.rectangle(centerX, centerY + 10, buttonWidth, buttonHeight, 0x00aa00, 1);
+    const resumeText = this.scene.add.text(centerX, centerY + 10, '▶️ RESUME', {
+      ...FontConfig.styles.small,
+      fontSize: buttonFontSize,
       color: '#ffffff',
     }).setOrigin(0.5);
 
@@ -526,10 +543,10 @@ export class GameManager {
     });
 
     // Restart button
-    const restartButton = this.scene.add.rectangle(centerX, centerY + 100, 250, 60, 0xaa0000, 1);
-    const restartText = this.scene.add.text(centerX, centerY + 100, '🔄 RESTART', {
-      ...FontConfig.styles.subtitle,
-      fontSize: '28px',
+    const restartButton = this.scene.add.rectangle(centerX, centerY + 75, buttonWidth, buttonHeight, 0xaa0000, 1);
+    const restartText = this.scene.add.text(centerX, centerY + 75, '🔄 RESTART', {
+      ...FontConfig.styles.small,
+      fontSize: buttonFontSize,
       color: '#ffffff',
     }).setOrigin(0.5);
 
@@ -567,6 +584,11 @@ export class GameManager {
   pauseForUpgrade(upgrades: any[]) {
     this.isPaused = true;
     
+    // Pause the spawn timer
+    if (this.spawnTimer) {
+      this.spawnTimer.paused = true;
+    }
+    
     // Stop all enemies and store their velocities
     this.pausedEnemyVelocities.clear();
     this.enemies.forEach(enemy => {
@@ -590,6 +612,11 @@ export class GameManager {
     this.upgradeUI.show(this.levelManager.getCurrentLevel(), upgrades, (upgrade) => {
       // Apply upgrade to player
       upgrade.apply(this.player);
+      
+      // Resume the spawn timer
+      if (this.spawnTimer) {
+        this.spawnTimer.paused = false;
+      }
       
       // Resume game - restore enemy velocities
       this.enemies.forEach(enemy => {
@@ -642,32 +669,49 @@ export class GameManager {
       enemy.body.setVelocity(0, 0);
     });
     
-    // Show game over UI
+    // Show game over UI - mobile-first responsive
     const centerX = this.scene.cameras.main.width / 2;
     const centerY = this.scene.cameras.main.height / 2;
+    const screenWidth = this.scene.cameras.main.width;
     
-    this.scene.add.text(centerX, centerY - 50, 'GAME OVER', {
-      ...FontConfig.styles.title,
+    // Adjust font sizes for mobile
+    const titleStyle = screenWidth < 400 ? FontConfig.styles.huge : FontConfig.styles.title;
+    const subtitleStyle = screenWidth < 400 ? FontConfig.styles.body : FontConfig.styles.subtitle;
+    
+    this.scene.add.text(centerX, centerY - 80, 'GAME OVER', {
+      ...titleStyle,
       color: '#ff0055',
     }).setOrigin(0.5);
     
-    this.scene.add.text(centerX, centerY + 20, `Final Score: ${this.score}`, {
-      ...FontConfig.styles.subtitle,
+    this.scene.add.text(centerX, centerY - 10, `Final Score: ${this.score}`, {
+      ...subtitleStyle,
       color: '#00ffff',
     }).setOrigin(0.5);
     
-    this.scene.add.text(centerX, centerY + 70, `Waves Completed: ${this.waveManager.getCurrentWave() - 1}`, {
-      ...FontConfig.styles.body,
+    this.scene.add.text(centerX, centerY + 30, `Waves: ${this.waveManager.getCurrentWave() - 1}`, {
+      ...FontConfig.styles.small,
       color: '#ffffff',
     }).setOrigin(0.5);
     
-    const restartText = this.scene.add.text(centerX, centerY + 120, 'Click to Restart', {
-      ...FontConfig.styles.body,
-      color: '#00ff00',
+    // Restart button (larger touch target)
+    const buttonWidth = Math.min(200, screenWidth - 80);
+    const restartButton = this.scene.add.rectangle(centerX, centerY + 90, buttonWidth, 50, 0x00aa00, 1);
+    this.scene.add.text(centerX, centerY + 90, 'RESTART', {
+      ...FontConfig.styles.smallBold,
+      color: '#ffffff',
     }).setOrigin(0.5);
     
-    restartText.setInteractive();
-    restartText.on('pointerdown', () => {
+    restartButton.setInteractive({ useHandCursor: true });
+    
+    restartButton.on('pointerover', () => {
+      restartButton.setFillStyle(0x00ff00);
+    });
+    
+    restartButton.on('pointerout', () => {
+      restartButton.setFillStyle(0x00aa00);
+    });
+    
+    restartButton.on('pointerdown', () => {
       this.scene.scene.restart();
     });
   }

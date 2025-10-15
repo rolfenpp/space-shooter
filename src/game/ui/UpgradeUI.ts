@@ -48,10 +48,10 @@ export class UpgradeUI {
 
     this.container.add([title, subtitle]);
 
-    // Mobile-first: Stack cards vertically
-    const cardWidth = Math.min(screenWidth - 40, 280); // 20px margin on each side
-    const cardHeight = 140;
-    const spacing = 15;
+    // Mobile-first: Stack cards vertically - compact design
+    const cardWidth = Math.min(screenWidth - 40, 300); // 20px margin on each side
+    const cardHeight = 70; // Smaller height
+    const spacing = 12;
     
     // Calculate starting Y position to center all cards vertically
     const totalHeight = (cardHeight * 3) + (spacing * 2);
@@ -65,59 +65,44 @@ export class UpgradeUI {
       const card = this.scene.add.rectangle(x, y, cardWidth, cardHeight, 0x1a1a1a, 1);
       card.setStrokeStyle(3, 0x00ff00);
 
-      // Layout elements horizontally within the card
-      const iconX = x - cardWidth / 2 + 40; // Left side
-      const textStartX = iconX + 50; // Text starts after icon
-      const textWidth = cardWidth - 110; // Available width for text
-      const buttonWidth = 80;
-
-      // Icon (smaller for compact layout)
-      const icon = this.scene.add.text(iconX, y, upgrade.icon, {
-        fontSize: '32px',
-      }).setOrigin(0.5);
+      // Text content - centered vertically, with padding
+      const textPadding = 20;
+      const textWidth = cardWidth - (textPadding * 2);
 
       // Name
-      const name = this.scene.add.text(textStartX, y - 20, upgrade.name, {
+      const name = this.scene.add.text(x, y - 12, upgrade.name, {
         ...FontConfig.styles.small,
         color: '#00ff00',
         wordWrap: { width: textWidth },
-        align: 'left',
-      }).setOrigin(0, 0.5);
+        align: 'center',
+      }).setOrigin(0.5);
 
       // Description
-      const description = this.scene.add.text(textStartX, y + 10, upgrade.description, {
+      const description = this.scene.add.text(x, y + 12, upgrade.description, {
         ...FontConfig.styles.tiny,
         color: '#ffffff',
         wordWrap: { width: textWidth },
-        align: 'left',
-      }).setOrigin(0, 0.5);
-
-      // Select button (on the right)
-      const buttonX = x + cardWidth / 2 - buttonWidth / 2 - 10;
-      const button = this.scene.add.rectangle(buttonX, y, buttonWidth, 50, 0x00aa00, 1);
-      const buttonText = this.scene.add.text(buttonX, y, '✓', {
-        fontSize: '28px',
-        color: '#ffffff',
+        align: 'center',
       }).setOrigin(0.5);
 
-      // Make interactive
-      button.setInteractive({ useHandCursor: true });
+      // Make entire card interactive
+      card.setInteractive({ useHandCursor: true });
       
-      button.on('pointerover', () => {
-        button.setFillStyle(0x00ff00);
+      card.on('pointerover', () => {
+        card.setFillStyle(0x2a2a2a);
         card.setStrokeStyle(4, 0xffff00);
       });
 
-      button.on('pointerout', () => {
-        button.setFillStyle(0x00aa00);
+      card.on('pointerout', () => {
+        card.setFillStyle(0x1a1a1a);
         card.setStrokeStyle(3, 0x00ff00);
       });
 
-      button.on('pointerdown', () => {
+      card.on('pointerdown', () => {
         this.selectUpgrade(upgrade);
       });
 
-      this.container.add([card, icon, name, description, button, buttonText]);
+      this.container.add([card, name, description]);
     });
 
     // Add pulsing animation to title
